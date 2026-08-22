@@ -5,44 +5,81 @@ A full-stack web application designed for clinic appointment booking, patient sy
 ## Live Application
 The hosted application is live at: [https://healthcare-frontend-i4v0.onrender.com](https://healthcare-frontend-i4v0.onrender.com)
 
-## Features
+---
 
-### Role-Based Portals
-- **Patient**: Register, login, find doctors by specialty, pick open slots, submit symptoms, reschedule/cancel bookings, and view post-visit summaries.
-- **Doctor**: View consultation schedule, check AI-generated pre-visit triage, write clinical notes, prescribe medication, and sync settings with Google Calendar.
-- **Admin**: Onboard new doctors, configure slot duration and weekly schedules, and manage doctor leaves.
+## Database Schema (Prisma)
 
-### Booking Security & Concurrency
-- Prevents double-booking by using database transactional advisory locks (`pg_advisory_xact_lock`) on the combination of `(doctorId, scheduledAt)`.
-- Handled atomic leave management where registering doctor leave automatically cancels and notifies patients with conflicting appointments.
+The application uses PostgreSQL with Prisma Client. Below is the relational structure:
 
-### AI Clinical Summaries (GPT-4o-mini)
-- Pre-visit triage converts patient symptom text into urgency level, chief complaint, and suggested diagnostic questions.
-- Post-visit notes are translated from clinical jargon to simple instructions and medication schedules.
-- System operates LLM tasks asynchronously in background queues so external API failures never block core scheduling.
+### Enums
+- **Role**: `PATIENT`, `DOCTOR`, `ADMIN`
+- **AppointmentStatus**: `PENDING`, `CONFIRMED`, `CANCELLED`, `COMPLETED`
+- **LlmStatus**: `PENDING`, `DONE`, `FAILED`, `SKIPPED`
+- **NotificationType**: `BOOKING_CONFIRMATION`, `APPOINTMENT_REMINDER`, `CANCELLATION`, `POST_VISIT_SUMMARY`, `MEDICATION_REMINDER`
+- **NotificationChannel**: `EMAIL`, `CALENDAR`
+- **NotificationStatus**: `PENDING`, `SENT`, `FAILED`
 
-### Notifications & Syncing
-- Google Calendar API OAuth integration for 2-way event syncing.
-- Cron background jobs for daily medication reminders and automatic email retries.
+### Models
+1. **User**: Manages credentials, names, emails, and phone numbers. Relates 1:1 to Patient or Doctor profiles.
+2. **Patient**: Stores DOB, blood group, allergies, and has many Appointments.
+3. **Doctor**: Stores specialization, slot duration (default 30 min), working hours configuration (JSON), and Google Calendar OAuth tokens.
+4. **DoctorLeave**: Manages leave dates with a unique constraint on `[doctorId, date]`.
+5. **Appointment**: Tracks patient, doctor, date/time, symptoms, AI pre-visit summary JSON, clinical notes, prescriptions JSON, AI post-visit care text, and Google Calendar event IDs.
+6. **NotificationLog**: Keeps audit logs of outbound emails/reminders, including retry counts and error strings.
 
 ---
 
-## Directory Structure
+## LLM Usage and Prompts
 
-```
-healthcare-app/
-├── backend/                  # Node.js + Express + Prisma + PostgreSQL
-│   ├── src/
-│   │   ├── controllers/      # Route controllers
-│   │   ├── jobs/             # Scheduled background workers
-│   │   └── services/         # Core business logic & external integrations
-│   └── tests/                # Jest tests
-└── frontend/                 # React 19 + Vite + Vanilla CSS
-    └── src/
-        ├── components/       # Common layouts & UI
-        ├── context/          # State & authentication
-        └── pages/            # Patient, Doctor, and Admin dashboards
-```
+The system integrates with OpenAI (GPT-4o-mini). If the API key is missing or fails, the application falls back gracefully to standard triage.
+
+### 1. Pre-Visit Triage Summary
+Runs automatically when a patient registers symptom text.
+* **Prompt**:
+  ```text
+  Analyse these symptoms and return a JSON object with exactly these fields:
+  - "urgency": one of "Low", "Medium", or "High"
+  - "chiefComplaint": a one-sentence summary of the main problem
+  - "suggestedQuestions": an array of exactly 3 questions the doctor should ask
+
+  Respond with valid JSON only, no extra text.
+  Symptoms: <symptoms>
+  ```
+
+### 2. Post-Visit Patient Summary
+Runs when a doctor logs the consultation notes and prescription list.
+* **Prompt**:
+  ```text
+  Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps. Keep it simple and clear.
+  Notes: <notes>
+  ```
+
+---
+
+## Google Calendar OAuth 2.0 Integration Setup
+
+Doctors can connect their Google Calendar for real-time 2-way sync:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com).
+2. Create a Project and enable the **Google Calendar API**.
+3. Configure the **OAuth Consent Screen** (specify User Type: External, add Test Users if in sandbox).
+4. Go to **Credentials** ➔ **Create Credentials** ➔ **OAuth Client ID**.
+5. Set the Application Type to **Web Application** and add the Authorized Redirect URI:
+   `http://localhost:3000/api/calendar/callback` (or your production URL).
+6. Copy the `Client ID` and `Client Secret` to your backend `.env` variables (`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`).
+
+---
+
+## REST API Reference Summary
+All protected endpoints require an `Authorization: Bearer <accessToken>` header.
+
+- `POST /api/auth/register` - Register a patient.
+- `POST /api/auth/login` - Authenticate any role.
+- `GET /api/doctors` - Find doctors by specialty.
+- `GET /api/doctors/:id/slots?date=YYYY-MM-DD` - Get available slots.
+- `POST /api/appointments` - Book a slot (requires symptoms).
+- `POST /api/doctor/consultations/:id` - Submit clinical visit notes.
+- `POST /api/admin/doctors/:id/leaves` - Register doctor leave.
 
 ---
 
