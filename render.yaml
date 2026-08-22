@@ -20,6 +20,10 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         value: https://healthcare-frontend.onrender.com
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: google/gemma-2-9b-it:free
 
   # Frontend Static Site
   - type: web
