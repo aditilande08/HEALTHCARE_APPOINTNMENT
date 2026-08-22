@@ -2,6 +2,9 @@
 
 A full-stack web application designed for clinic appointment booking, patient symptom triage, and medical consultation summaries. It includes separate portals for admins, doctors, and patients.
 
+## Live Application
+The hosted application is live at: [https://healthcare-frontend-i4v0.onrender.com](https://healthcare-frontend-i4v0.onrender.com)
+
 ## Features
 
 ### Role-Based Portals
