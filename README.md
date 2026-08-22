@@ -116,8 +116,8 @@ healthcare-app/
    npm run db:seed
    ```
    *Default Admin Credentials:*
-   - **Email**: `admin@healthcare.com`
-   - **Password**: `AdminPass123!`
+   - **Email**: `admin@clinic.com`
+   - **Password**: `admin123456`
 
 5. **Start Backend Server**:
    ```bash
@@ -156,7 +156,7 @@ npm test
 
 ## 🔒 Default Role Workflow
 
-1. **Admin (`admin@healthcare.com` / `AdminPass123!`)**:
+1. **Admin (`admin@clinic.com` / `admin123456`)**:
    - Log in and navigate to **Manage Doctors & Leave**.
    - Click **Onboard New Doctor** to register a doctor with specific specialty and consultation hours.
    - Schedule doctor leave days to test automatic conflict cancellation.

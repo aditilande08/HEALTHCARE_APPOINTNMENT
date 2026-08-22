@@ -101,5 +101,5 @@ docker compose up --build
 
 ## 🔑 Default Seed Account
 Once your database is pushed and seeded, log in to the admin portal with:
-- **Email**: `admin@healthcare.com`
-- **Password**: `AdminPass123!`
+- **Email**: `admin@clinic.com`
+- **Password**: `admin123456`
