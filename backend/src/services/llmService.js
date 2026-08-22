@@ -93,7 +93,7 @@ Symptoms: ${symptoms}`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: process.env.LLM_MODEL || 'google/gemini-2.5-flash',
+      model: process.env.LLM_MODEL || 'google/gemma-2-9b-it:free',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
       temperature: 0.3,
@@ -149,7 +149,7 @@ Write the summary in plain paragraphs, no bullet points, no medical jargon.`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: process.env.LLM_MODEL || 'google/gemini-2.5-flash',
+      model: process.env.LLM_MODEL || 'google/gemma-2-9b-it:free',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.4,
     });
