@@ -21,7 +21,7 @@ export default function Navbar() {
           <div className="brand-icon">
             <HeartPulse size={20} />
           </div>
-          <span>HealthCare</span>
+          <span>Health Is Aura</span>
         </Link>
 
         {isAuthenticated ? (

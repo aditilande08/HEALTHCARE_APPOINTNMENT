@@ -34,7 +34,7 @@ export default function Login() {
           </div>
           <h2>Welcome Back</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-            Sign in to access your healthcare portal
+            Sign in to access your Health Is Aura portal
           </p>
         </div>
 
