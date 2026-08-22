@@ -9,12 +9,68 @@ function getClient() {
   return client;
 }
 
+function getMockPreVisitSummary(symptoms) {
+  const s = (symptoms || '').toLowerCase();
+  
+  if (s.includes('chest') || s.includes('heart') || s.includes('breath') || s.includes('pain') || s.includes('severe')) {
+    return {
+      urgency: 'High',
+      chiefComplaint: 'Patient reports acute chest/respiratory distress or severe discomfort.',
+      suggestedQuestions: [
+        'How long have you had this chest discomfort or breathing issue?',
+        'Does the pain radiate to your left arm, neck, or back?',
+        'Are you experiencing accompanying symptoms like cold sweats, nausea, or dizziness?'
+      ]
+    };
+  }
+
+  if (s.includes('fever') || s.includes('cough') || s.includes('throat') || s.includes('headache') || s.includes('cold')) {
+    return {
+      urgency: 'Medium',
+      chiefComplaint: 'Patient presents with acute symptoms of a potential respiratory infection or fever.',
+      suggestedQuestions: [
+        'Have you taken your temperature, and if so, what was the highest reading?',
+        'Is your cough dry or producing phlegm?',
+        'Are you experiencing associated muscle aches, chills, or difficulty swallowing?'
+      ]
+    };
+  }
+
+  return {
+    urgency: 'Low',
+    chiefComplaint: 'Patient reports mild or general physical symptoms for clinical assessment.',
+    suggestedQuestions: [
+      'When did you first notice these symptoms, and have they changed over time?',
+      'Does anything specific make the symptoms better or worse?',
+      'Have you tried any over-the-counter medications or home remedies?'
+    ]
+  };
+}
+
+function getMockPostVisitSummary(notes, prescriptions) {
+  const prescriptionList = prescriptions && prescriptions.length > 0
+    ? prescriptions.map(p => `- ${p.medication} (${p.dose}): ${p.frequency} for ${p.days} days`).join('\n')
+    : 'No active prescriptions.';
+
+  return `CLINICAL SUMMARY (LOCAL AI SIMULATOR):
+Based on your visit, here is a summary of the clinical findings:
+${notes}
+
+MEDICATION SCHEDULE:
+${prescriptionList}
+
+FOLLOW-UP STEPS:
+- Monitor your symptoms closely over the coming days.
+- Ensure proper rest and hydration.
+- If your symptoms worsen or do not improve within 3 to 5 days, please contact the clinic.`;
+}
+
 async function generatePreVisitSummary(symptoms) {
   const openai = getClient();
 
   if (!openai) {
-    console.warn('[LLM] OPENAI_API_KEY not set — skipping pre-visit summary');
-    return null;
+    console.warn('[LLM] OPENAI_API_KEY not set — using smart rule-based simulator');
+    return getMockPreVisitSummary(symptoms);
   }
 
   const prompt = `Analyse these symptoms and return a JSON object with exactly these fields:
@@ -48,8 +104,8 @@ Symptoms: ${symptoms}`;
       suggestedQuestions: parsed.suggestedQuestions.slice(0, 3),
     };
   } catch (err) {
-    console.error('[LLM] Pre-visit summary failed:', err.message);
-    return null;
+    console.error('[LLM] Pre-visit summary failed, using fallback:', err.message);
+    return getMockPreVisitSummary(symptoms);
   }
 }
 
@@ -57,8 +113,8 @@ async function generatePostVisitSummary(notes, prescriptions) {
   const openai = getClient();
 
   if (!openai) {
-    console.warn('[LLM] OPENAI_API_KEY not set — skipping post-visit summary');
-    return null;
+    console.warn('[LLM] OPENAI_API_KEY not set — using local mock summary');
+    return getMockPostVisitSummary(notes, prescriptions);
   }
 
   const prescriptionText =
@@ -91,8 +147,8 @@ Write the summary in plain paragraphs, no bullet points, no medical jargon.`;
 
     return response.choices[0].message.content.trim();
   } catch (err) {
-    console.error('[LLM] Post-visit summary failed:', err.message);
-    return null;
+    console.error('[LLM] Post-visit summary failed, using fallback:', err.message);
+    return getMockPostVisitSummary(notes, prescriptions);
   }
 }
 
