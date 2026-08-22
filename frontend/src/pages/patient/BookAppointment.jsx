@@ -70,7 +70,7 @@ export default function BookAppointment() {
       setError('');
       const appt = await api.post('/appointments', {
         doctorId,
-        scheduledAt: selectedSlot.datetime,
+        scheduledAt: selectedSlot.scheduledAt,
         symptoms: symptoms.trim() || undefined,
       });
 
