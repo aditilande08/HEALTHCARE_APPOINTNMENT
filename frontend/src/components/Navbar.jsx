@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Stethoscope, User, Calendar, LogOut, ShieldCheck, HeartPulse } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -17,10 +18,8 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <Link to="/" className="brand">
-          <div className="brand-icon">
-            <HeartPulse size={20} />
-          </div>
+        <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img src={logo} alt="Health Is Aura Logo" style={{ height: '40px', width: 'auto', borderRadius: '50%' }} />
           <span>Health Is Aura</span>
         </Link>
 

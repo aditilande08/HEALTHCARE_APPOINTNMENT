@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HeartPulse, Lock, Mail, AlertCircle } from 'lucide-react';
+import { Lock, Mail, AlertCircle } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -29,8 +30,8 @@ export default function Login() {
     <div style={{ maxWidth: '440px', margin: '3rem auto', padding: '0 1rem' }}>
       <div className="card" style={{ padding: '2.5rem 2rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div className="brand-icon" style={{ margin: '0 auto 1rem', width: '48px', height: '48px' }}>
-            <HeartPulse size={28} />
+          <div style={{ margin: '0 auto 1.25rem', width: '100px', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <img src={logo} alt="Health Is Aura Logo" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '50%', objectFit: 'contain' }} />
           </div>
           <h2>Welcome Back</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
