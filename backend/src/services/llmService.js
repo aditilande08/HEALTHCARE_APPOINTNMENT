@@ -5,7 +5,16 @@ let client = null;
 
 function getClient() {
   if (!config.openai.apiKey) return null;
-  if (!client) client = new OpenAI({ apiKey: config.openai.apiKey });
+  if (!client) {
+    client = new OpenAI({
+      baseURL: process.env.OPENAI_BASE_URL || 'https://openrouter.ai/api/v1',
+      apiKey: config.openai.apiKey,
+      defaultHeaders: {
+        'HTTP-Referer': 'https://healthcare-frontend-i4v0.onrender.com', // Optional OpenRouter header
+        'X-Title': 'Health Is Aura Portal'
+      }
+    });
+  }
   return client;
 }
 
@@ -84,7 +93,7 @@ Symptoms: ${symptoms}`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: process.env.LLM_MODEL || 'google/gemini-2.5-flash',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
       temperature: 0.3,
@@ -140,7 +149,7 @@ Write the summary in plain paragraphs, no bullet points, no medical jargon.`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: process.env.LLM_MODEL || 'google/gemini-2.5-flash',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.4,
     });
